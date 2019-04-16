@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, Image, ImageBackground, TouchableOpacity, TextInput, StyleSheet, Dimensions } from 'react-native';
+import { Text, View, ScrollView, Image, ImageBackground, TouchableOpacity, TextInput, StyleSheet, Dimensions, Alert } from 'react-native';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import CheckBox from 'react-native-check-box'
 
@@ -16,7 +16,7 @@ export default class CreateProducts extends Component {
     constructor() {
         super()
         this.state = {
-            imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsNGytzxOHh4s3tLkhhyu_9ZqSXsPLqOTz4A0IoMqpMI10urKoAw",
+            imageUrl: "",
             productName: "",
             Price: "",
             category: "",
@@ -51,7 +51,6 @@ export default class CreateProducts extends Component {
 
     componentDidMount() {
         const currentProduct = this.props.navigation.state.params
-      
         this.setState({
             submitionType: currentProduct.type,
             imageUrl: currentProduct.currentProduct.imageUrl,
@@ -74,26 +73,43 @@ export default class CreateProducts extends Component {
             categoryVal,
             sizeArry,
         } = this.state;
-        fetch("https://shopingapp.herokuapp.com/product/createProducts", {
-            method: "POST",
-            body: JSON.stringify({
-                imageUrl,
-                name: productName,
-                price: Number(Price),
-                category: [categoryVal, categoryType],
-                size: sizeArry,
-            }),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-        }).then((res) => {
-            res.json().then(() => {
-                alert("Product created")
-                this.props.navigation.navigate("Dashboard")
-            })
+        if (productName !== "" && Price !== "" && categoryVal !== "" && categoryType !== "Select" && imageUrl !== "") {
+            fetch("https://shoopingapi.herokuapp.com/product/createProducts", {
+                method: "POST",
+                body: JSON.stringify({
+                    imageUrl,
+                    name: productName,
+                    price: Number(Price),
+                    category: [categoryVal, categoryType],
+                    size: sizeArry,
+                }),
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then((res) => {
+                res.json().then(async (data) => {
+                    Alert.alert(
+                        'Product has been created',
+                        'Go to dashboard', [{
+                            text: 'Cancel',
+                            onPress: () => console.log('Cancel Pressed'),
+                            style: 'cancel'
+                        }, {
+                            text: 'OK',
+                            onPress: () => this.props.navigation.navigate("Dashboard", data)
+                        },], {
+                            cancelable: false
+                        }
+                    )
 
-        }).catch((err) => { })
+                })
+
+            }).catch((err) => { })
+        }
+        else {
+            alert("Rrequir all feilds")
+        }
 
     }
 
@@ -108,8 +124,8 @@ export default class CreateProducts extends Component {
             categoryType,
             categoryVal,
         } = this.state;
-      
-        fetch("https://shopingapp.herokuapp.com/product/updateProduct", {
+
+        fetch("https://shoopingapi.herokuapp.com/product/updateProduct", {
             method: "PUT",
             body: JSON.stringify({
                 imageUrl,
@@ -125,8 +141,19 @@ export default class CreateProducts extends Component {
             },
         }).then((res) => {
             res.json().then(() => {
-                alert("Product updated")
-                this.props.navigation.navigate("Dashboard")
+                Alert.alert(
+                    'Product has been Updated',
+                    'Go to dashboard', [{
+                        text: 'Cancel',
+                        onPress: () => console.log('Cancel Pressed'),
+                        style: 'cancel'
+                    }, {
+                        text: 'OK',
+                        onPress: () => this.props.navigation.navigate("Dashboard", data)
+                    },], {
+                        cancelable: false
+                    }
+                )
             })
         }).catch((err) => {
             console.log(err)
@@ -141,17 +168,17 @@ export default class CreateProducts extends Component {
         const {
             productName,
             Price,
-            category,
-            Size,
             submitionType,
             categoryType,
             isChecked1,
             isChecked2,
-            isChecke3,
+            isChecked3,
             sizeArry,
-            categoryVal
+            categoryVal,
+            imageUrl
 
         } = this.state;
+        console.log(sizeArry)
         return (
             <View style={styles.ScrollView_View} >
                 <ScrollView>
@@ -169,30 +196,37 @@ export default class CreateProducts extends Component {
                             </View>
                             <View style={styles.TextInputView}>
                                 <TextInput
-                                  keyboardType={"numeric"}
+                                    keyboardType={"numeric"}
                                     value={Price}
                                     onChangeText={(Price) => this.setState({ Price })}
                                     style={styles.TextInput}
-                                    
+
                                     placeholder="Price" />
                             </View>
                             <View style={{ flexDirection: "row", justifyContent: "space-between", width: "90%", alignSelf: "center" }} >
-                                <TouchableOpacity style={[styles.TextInputView, { width: "49%", }]} >
+                                <View style={[styles.TextInputView, { width: "49%", }]} >
                                     <TextInput
                                         value={categoryVal}
                                         onChangeText={(categoryVal) => this.setState({ categoryVal })}
                                         style={styles.TextInput}
                                         placeholder="Category" />
-                                </TouchableOpacity>
-                                <TouchableOpacity style={[styles.TextInputView, { width: "49%", justifyContent: "center", paddingLeft: 15 }]} >
+                                </View>
+                                <TouchableOpacity onPress={this.showMenu} style={[styles.TextInputView, { width: "49%", justifyContent: "center", paddingLeft: 15 }]} >
                                     <Menu
                                         ref={this.setMenuRef}
-                                        button={<Text style={{color:"#003374"}} onPress={this.showMenu}>{categoryType}</Text>}>
+                                        button={<Text style={{ color: "#003374" }}>{categoryType}</Text>}>
                                         <MenuItem onPress={this.hideMenu.bind(this, "Kids")}>Kids</MenuItem>
                                         <MenuItem onPress={this.hideMenu.bind(this, "Male")}>Male</MenuItem>
                                         <MenuItem onPress={this.hideMenu.bind(this, "Female")}>Female</MenuItem>
                                     </Menu>
                                 </TouchableOpacity>
+                            </View>
+                            <View style={[styles.TextInputView]} >
+                                <TextInput
+                                    value={imageUrl}
+                                    onChangeText={(imageUrl) => this.setState({ imageUrl })}
+                                    style={styles.TextInput}
+                                    placeholder="Image URL" />
                             </View>
                             <View style={[styles.TextInputView, { justifyContent: "space-between", flexDirection: "row", backgroundColor: "rgba(1,18,148, 1)" }]}>
                                 <CheckBox

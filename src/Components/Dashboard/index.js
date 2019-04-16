@@ -1,44 +1,20 @@
 import React, { Component } from 'react';
-import { Text, View, Dimensions,  TouchableOpacity, BackHandler, Alert, Platform, StyleSheet } from 'react-native';
+import { Text, View, Dimensions, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from "react-native-vector-icons/Feather"
 import ProductsList from "./ProducList/index"
 
-const { height, width } = Dimensions.get("window")
 export default class Dashboard extends Component {
-    componentDidMount() {
-        if (Platform.OS == "android") {
-            BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        }
-    }
-
-    handleBackButton = () => {
-        Alert.alert(
-            'Exit App',
-            'Exiting the application?', [{
-                text: 'Cancel',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel'
-            }, {
-                text: 'OK',
-                onPress: () => BackHandler.exitApp()
-            },], {
-                cancelable: false
-            }
-        )
-        return true;
-    }
-
-
-    componentWillUnmount() {
-        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
-    }
-
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.header} >
                     <View style={styles.headerHeadingView} >
-                        <Text style={styles.headingText}>Products</Text>
+                        <View style={{ flexDirection: "row" }} >
+                            <TouchableOpacity onPress={() => this.props.navigation.navigate("Home")} >
+                                <Icon name="arrow-left" color="#fff" size={20} />
+                            </TouchableOpacity>
+                            <Text style={styles.headingText}>Products</Text>
+                        </View>
                     </View>
                     <View style={styles.headerButtonContainer} >
                         <TouchableOpacity activeOpacity={0.6}
@@ -46,7 +22,7 @@ export default class Dashboard extends Component {
                                 {
                                     type: "CREATE",
                                     currentProduct: {
-                                        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsNGytzxOHh4s3tLkhhyu_9ZqSXsPLqOTz4A0IoMqpMI10urKoAw",
+                                        imageUrl: "",
                                         name: "",
                                         price: "",
                                         category: [],
@@ -59,7 +35,6 @@ export default class Dashboard extends Component {
                         </TouchableOpacity>
                     </View>
                 </View>
-
                 <View style={{ flex: 1 }} >
                     <ProductsList navigation={this.props.navigation} />
                 </View>
@@ -112,7 +87,8 @@ const styles = StyleSheet.create({
     },
     headingText: {
         color: "#fff",
-        fontWeight: "500"
+        fontWeight: "500",
+        marginLeft: 10
     },
     headerButtonContainer: {
         justifyContent: "flex-end",

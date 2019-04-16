@@ -25,7 +25,7 @@ export default class ViewProduct extends Component {
 
     deleteProduct() {
         const { currentProduct } = this.state;
-        fetch("https://shopingapp.herokuapp.com/product/deleteProduct", {
+        fetch("https://shoopingapi.herokuapp.com/product/deleteProduct", {
             method: "DELETE",
             body: JSON.stringify(currentProduct),
             headers: {

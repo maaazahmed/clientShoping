@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, Image,  TouchableOpacity, TextInput, } from 'react-native';
+import { Text, View, ScrollView, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import styles from "../Login_signUpStyle/index"
 
 
@@ -9,7 +9,8 @@ export default class SimpleLoingScreen extends Component {
         this.state = {
             username: "",
             email: "",
-            password: ""
+            password: "",
+            isLoader: false
         }
     }
 
@@ -20,31 +21,49 @@ export default class SimpleLoingScreen extends Component {
             email,
             password
         } = this.state;
-
-        
-        fetch("https://shopingapp.herokuapp.com/account/signup", {
-            method: "POST",
-            body: JSON.stringify({
-                username,
-                email,
-                password
-            }),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-        }).then((res) => {
-            res.json().then((data)=>{
-                if(data.message == "User Created"){
-                    this.props.navigation.navigate("Dashboard")
-                }
-                else{
-                    alert("Somthin want to wrong")
-                }
-            })
-        }).catch((err) => {
-            console.log(err)
+        this.setState({
+            isLoader: true
         })
+
+        if (username !== "" && email !== "" && password !== "") {
+            fetch("https://shoopingapi.herokuapp.com/account/signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password
+                }),
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then((res) => {
+                res.json().then((data) => {
+                    if (data.message == "User Created") {
+                        this.setState({
+                            isLoader: false
+                        })
+                        this.props.navigation.navigate("Home")
+                    }
+                    else {
+                        alert("Somthin want to wrong")
+                        this.setState({
+                            isLoader: false
+                        })
+                    }
+                })
+            }).catch((err) => {
+                this.setState({
+                    isLoader: false
+                })
+            })
+        }
+        else {
+            alert("Require All Feilds")
+            this.setState({
+                isLoader: false
+            })
+        }
 
     }
 
@@ -106,6 +125,21 @@ export default class SimpleLoingScreen extends Component {
                         </View>
                     </View>
                 </ScrollView>
+
+                {(this.state.isLoader) ?
+                    <View style={{
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "rgba(250,  250, 250,  0.5)",
+                        justifyContent: "center",
+                    }} >
+                        <ActivityIndicator color="#003347" size={30} />
+                    </View>
+                    : null}
+
             </View>
         );
     }

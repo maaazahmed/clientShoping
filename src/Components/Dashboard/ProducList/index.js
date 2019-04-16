@@ -1,18 +1,15 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, Dimensions, Image, TouchableOpacity, BackHandler, Alert, Platform } from 'react-native';
+import { Text, View, ScrollView, Dimensions, Image, TouchableOpacity, BackHandler, Alert, Platform, Modal, ImageBackground } from 'react-native';
 
 
-const { height, width } = Dimensions.get("window")
+const { height } = Dimensions.get("window")
 export default class ProductsList extends Component {
     state = {
-        productList: []
+        productList: [],
     }
-
     componentDidMount() {
-        if (Platform.OS == "android") {
-            BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        }
-        fetch("https://shopingapp.herokuapp.com/product/getProduct", {
+        const fashion = this.props.navigation.state.params.type
+        fetch("https://shoopingapi.herokuapp.com/product/getProduct?fashion=" + fashion, {
             method: "GET",
         }).then((res) => {
             res.json().then((data) => {
@@ -23,35 +20,11 @@ export default class ProductsList extends Component {
         }).catch((err) => {
             console.log("Error: ", err)
         })
-
-
     }
 
-    handleBackButton = () => {
-        Alert.alert(
-            'Exit App',
-            'Exiting the application?', [{
-                text: 'Cancel',
-                onPress: () => console.log('Cancel Pressed'),
-                style: 'cancel'
-            }, {
-                text: 'OK',
-                onPress: () => BackHandler.exitApp()
-            },], {
-                cancelable: false
-            }
-        )
-        return true;
-    }
 
-    componentWillUnmount() {
-        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
-
-
-
-    }
     render() {
-        var { productList } = this.state;
+        const { productList } = this.state;
         return (
             <View style={{ flex: 1, }}>
                 <ScrollView>
@@ -77,8 +50,7 @@ export default class ProductsList extends Component {
                                         borderRadius: 5,
                                     }} >
                                     <View style={{
-                                        height: 300,
-                                        width: "100%"
+                                        height: 300, width: "100%"
                                     }} >
                                         <View style={{ flex: 1 }} >
                                             <View style={{ flex: 2.5, padding: 10 }} >
@@ -98,6 +70,7 @@ export default class ProductsList extends Component {
                         })}
                     </View>
                 </ScrollView>
+
             </View>
         )
     }
