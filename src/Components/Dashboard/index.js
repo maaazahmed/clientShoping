@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, Dimensions, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from "react-native-vector-icons/Feather"
 import ProductsList from "./ProducList/index"
 
@@ -25,7 +25,7 @@ export default class Dashboard extends Component {
                                         imageUrl: "",
                                         name: "",
                                         price: "",
-                                        category: [],
+                                        category: ["", "Select"],
                                         Size: [],
                                     }
                                 })}

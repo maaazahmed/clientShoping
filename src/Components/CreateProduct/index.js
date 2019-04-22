@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, Image, ImageBackground, TouchableOpacity, TextInput, StyleSheet, Dimensions, Alert } from 'react-native';
-import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
+import { Text, View, ScrollView, TouchableOpacity, TextInput, StyleSheet, Dimensions, Alert, ActivityIndicator } from 'react-native';
+import Menu, { MenuItem } from 'react-native-material-menu';
 import CheckBox from 'react-native-check-box'
 
 
@@ -8,7 +8,7 @@ const { height } = Dimensions.get("window");
 
 export default class CreateProducts extends Component {
     static navigationOptions = {
-        title: "Create Product",
+        title: "Product",
         headerStyle: { backgroundColor: 'rgba(1,18,148, 1)' },
         headerTitleStyle: { color: '#fff', fontSize: 14 },
         headerTintColor: '#ffffff',
@@ -19,13 +19,13 @@ export default class CreateProducts extends Component {
             imageUrl: "",
             productName: "",
             Price: "",
-            category: "",
             size: "",
             submitionType: "",
             categoryType: "Select",
             isChecked1: false,
             isChecked2: false,
             isChecke3: false,
+            isLoader: false,
             sizeArry: [],
             categoryVal: ""
         }
@@ -50,15 +50,15 @@ export default class CreateProducts extends Component {
 
 
     componentDidMount() {
-        const currentProduct = this.props.navigation.state.params
+        const currentProduct = this.props.navigation.state.params;
         this.setState({
             submitionType: currentProduct.type,
             imageUrl: currentProduct.currentProduct.imageUrl,
             productName: currentProduct.currentProduct.name,
             Price: currentProduct.currentProduct.price.toString(),
             size: currentProduct.currentProduct.size,
-            category: currentProduct.currentProduct.category,
-            categoryVal: currentProduct.currentProduct.category[0]
+            categoryVal: currentProduct.currentProduct.category[0],
+            categoryType: currentProduct.currentProduct.category[1]
         })
     }
 
@@ -74,6 +74,9 @@ export default class CreateProducts extends Component {
             sizeArry,
         } = this.state;
         if (productName !== "" && Price !== "" && categoryVal !== "" && categoryType !== "Select" && imageUrl !== "") {
+            this.setState({
+                isLoader: true
+            })
             fetch("https://shoopingapi.herokuapp.com/product/createProducts", {
                 method: "POST",
                 body: JSON.stringify({
@@ -89,23 +92,32 @@ export default class CreateProducts extends Component {
                 },
             }).then((res) => {
                 res.json().then(async (data) => {
-                    Alert.alert(
-                        'Product has been created',
-                        'Go to dashboard', [{
-                            text: 'Cancel',
-                            onPress: () => console.log('Cancel Pressed'),
-                            style: 'cancel'
-                        }, {
-                            text: 'OK',
-                            onPress: () => this.props.navigation.navigate("Dashboard", data)
-                        },], {
-                            cancelable: false
-                        }
-                    )
+                    setTimeout(() => {
+                        this.setState({
+                            isLoader: false
+                        })
+                        Alert.alert(
+                            'Product has been created',
+                            'Go to dashboard', [{
+                                text: 'Cancel',
+                                onPress: () => console.log('Cancel Pressed'),
+                                style: 'cancel'
+                            }, {
+                                text: 'OK',
+                                onPress: () => this.props.navigation.navigate("Dashboard", data)
+                            },], {
+                                cancelable: false
+                            }
+                        )
+                    }, 1000)
 
                 })
 
-            }).catch((err) => { })
+            }).catch((err) => {
+                this.setState({
+                    isLoader: false
+                })
+            })
         }
         else {
             alert("Rrequir all feilds")
@@ -124,68 +136,70 @@ export default class CreateProducts extends Component {
             categoryType,
             categoryVal,
         } = this.state;
-
-        fetch("https://shoopingapi.herokuapp.com/product/updateProduct", {
-            method: "PUT",
-            body: JSON.stringify({
-                imageUrl,
-                name: productName,
-                price: Number(Price),
-                _id: this.props.navigation.state.params.currentProduct._id,
-                category: [categoryVal, categoryType],
-                size: sizeArry,
-            }),
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-        }).then((res) => {
-            res.json().then(() => {
-                Alert.alert(
-                    'Product has been Updated',
-                    'Go to dashboard', [{
-                        text: 'Cancel',
-                        onPress: () => console.log('Cancel Pressed'),
-                        style: 'cancel'
-                    }, {
-                        text: 'OK',
-                        onPress: () => this.props.navigation.navigate("Dashboard", data)
-                    },], {
-                        cancelable: false
-                    }
-                )
+        if (productName !== "" && Price !== "" && categoryVal !== "" && categoryType !== "Select" && imageUrl !== "") {
+            this.setState({
+                isLoader: true
             })
-        }).catch((err) => {
-            console.log(err)
-        })
-
+            fetch("https://shoopingapi.herokuapp.com/product/updateProduct", {
+                method: "PUT",
+                body: JSON.stringify({
+                    imageUrl,
+                    name: productName,
+                    price: Number(Price),
+                    _id: this.props.navigation.state.params.currentProduct._id,
+                    category: [categoryVal, categoryType],
+                    size: sizeArry,
+                }),
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }).then((res) => {
+                res.json().then(() => {
+                    setTimeout(() => {
+                        this.setState({
+                            isLoader: false
+                        })
+                        Alert.alert(
+                            'Product has been Updated',
+                            'Go to dashboard', [{
+                                text: 'Cancel',
+                                onPress: () => console.log('Cancel Pressed'),
+                                style: 'cancel'
+                            }, {
+                                text: 'OK',
+                                onPress: () => this.props.navigation.navigate("Dashboard")
+                            },], {
+                                cancelable: false
+                            }
+                        )
+                    }, 1000)
+                })
+            }).catch((err) => {
+                this.setState({
+                    isLoader: false
+                })
+            })
+        }
+        else {
+            alert("Requier all feild !")
+        }
     }
-
-
-
-
     render() {
         const {
             productName,
             Price,
             submitionType,
             categoryType,
-            isChecked1,
-            isChecked2,
-            isChecked3,
             sizeArry,
             categoryVal,
             imageUrl
 
         } = this.state;
-        console.log(sizeArry)
         return (
             <View style={styles.ScrollView_View} >
                 <ScrollView>
                     <View style={styles.ScrollViewContainet}>
-                        {/* <View style={{ flex: 1, justifyContent: "center", alignSelf: "center", }} >
-                            <Text style={{ color: "#fff", fontSize: 20, fontWeight: "500", alignSelf: "center" }} >Create Product</Text>
-                        </View> */}
                         <View style={{ flex: 3, justifyContent: "center" }} >
                             <View style={styles.TextInputView} >
                                 <TextInput
@@ -211,7 +225,7 @@ export default class CreateProducts extends Component {
                                         style={styles.TextInput}
                                         placeholder="Category" />
                                 </View>
-                                <TouchableOpacity onPress={this.showMenu} style={[styles.TextInputView, { width: "49%", justifyContent: "center", paddingLeft: 15 }]} >
+                                <TouchableOpacity activeOpacity={.7} onPress={this.showMenu} style={[styles.TextInputView, { width: "49%", justifyContent: "center", paddingLeft: 15 }]} >
                                     <Menu
                                         ref={this.setMenuRef}
                                         button={<Text style={{ color: "#003374" }}>{categoryType}</Text>}>
@@ -314,6 +328,19 @@ export default class CreateProducts extends Component {
                         </View>
                     </View>
                 </ScrollView>
+                {(this.state.isLoader) ?
+                    <View style={{
+                        position: "absolute",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "rgba(250,  250, 250,  0.5)",
+                        justifyContent: "center",
+                    }} >
+                        <ActivityIndicator color="#003347" size={30} />
+                    </View>
+                    : null}
             </View>
         );
     }

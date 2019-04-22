@@ -54,6 +54,7 @@ export default class SimpleLoingScreen extends Component {
                     }
                 })
             }).catch((err) => {
+                alert("Fetch feild ! ")
                 this.setState({
                     isLoader: false
                 })

@@ -5,7 +5,7 @@ import { View, Text, ScrollView, Dimensions, Image, TouchableOpacity } from "rea
 const { height, width } = Dimensions.get("window")
 export default class ViewProduct extends Component {
     static navigationOptions = {
-        title: "Create Product",
+        title: "Product",
         headerStyle: { backgroundColor: 'rgba(1,18,148, 1)' },
         headerTitleStyle: { color: '#fff', fontSize: 14 },
         headerTintColor: '#ffffff',

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, Dimensions, Image, TouchableOpacity, BackHandler, Alert, Platform, Modal, ImageBackground } from 'react-native';
+import { Text, View, ScrollView, Dimensions, Image, TouchableOpacity, } from 'react-native';
 
 
 const { height } = Dimensions.get("window")
@@ -13,9 +13,14 @@ export default class ProductsList extends Component {
             method: "GET",
         }).then((res) => {
             res.json().then((data) => {
-                this.setState({
-                    productList: data
-                })
+                if (!data.name) {
+                    this.setState({
+                        productList: data
+                    })
+                }
+                else {
+                    alert("Nework problem")
+                }
             })
         }).catch((err) => {
             console.log("Error: ", err)
